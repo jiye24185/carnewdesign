@@ -87,11 +87,6 @@
             color: #ffffff;
         }
 
-        .option:hover {
-            border-color: #ff0000;
-            background: #1a1a1a;
-        }
-
         .option.selected {
             border-color: #ff0000;
             background: #ff0000;
@@ -102,6 +97,37 @@
         .option-icon {
             font-size: 2em;
             margin-bottom: 10px;
+        }
+
+        /* Color swatch styles */
+        .color-swatch {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border: 3px solid #333;
+            transition: all 0.2s ease;
+        }
+
+        .option:hover .color-swatch {
+            border-color: #ff0000;
+            transform: scale(1.05);
+        }
+
+        .option.selected .color-swatch {
+            border-color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Enhanced affordance - add scale and shadow on hover */
+        .option:hover {
+            border-color: #ff0000;
+            background: #1a1a1a;
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .option:active {
+            transform: scale(0.98);
         }
 
         .navigation {
@@ -322,27 +348,27 @@
             <div class="question">Choose your car color</div>
             <div class="options">
                 <div class="option" data-value="Red">
-                    <div class="option-icon">🔴</div>
+                    <div class="color-swatch" style="background-color: #e74c3c;"></div>
                     Red
                 </div>
                 <div class="option" data-value="Blue">
-                    <div class="option-icon">🔵</div>
+                    <div class="color-swatch" style="background-color: #3498db;"></div>
                     Blue
                 </div>
                 <div class="option" data-value="Black">
-                    <div class="option-icon">⚫</div>
+                    <div class="color-swatch" style="background-color: #2c3e50;"></div>
                     Black
                 </div>
                 <div class="option" data-value="White">
-                    <div class="option-icon">⚪</div>
+                    <div class="color-swatch" style="background-color: #ecf0f1;"></div>
                     White
                 </div>
                 <div class="option" data-value="Yellow">
-                    <div class="option-icon">🟡</div>
+                    <div class="color-swatch" style="background-color: #f1c40f;"></div>
                     Yellow
                 </div>
                 <div class="option" data-value="Green">
-                    <div class="option-icon">🟢</div>
+                    <div class="color-swatch" style="background-color: #2ecc71;"></div>
                     Green
                 </div>
             </div>
@@ -448,6 +474,40 @@
             'Green': '#2ecc71'
         };
 
+        // ===== SOUND EFFECTS =====
+        // Create engine "vroom" sound using Web Audio API
+        function playEngineSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Create oscillator for the engine sound
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                // Connect nodes
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Configure the sound - start low and rev up
+                oscillator.type = 'sawtooth'; // Sawtooth wave sounds more engine-like
+                oscillator.frequency.setValueAtTime(80, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+
+                // Volume envelope - fade in and out
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.05);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+
+                // Play the sound
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (error) {
+                // Silent fail if Web Audio API is not supported
+                console.log('Audio not supported');
+            }
+        }
+
         // ===== STEP NAVIGATION =====
         // Function to show a specific step and hide all others
         function showStep(stepNumber) {
@@ -484,6 +544,8 @@
             const value = option.dataset.value;
             if (stepId === 'step-1') {
                 state.selections.color = value;
+                // Play engine sound when color is selected
+                playEngineSound();
             } else if (stepId === 'step-2') {
                 state.selections.tireShape = value;
             } else if (stepId === 'step-3') {
