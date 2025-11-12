@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Your Car</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question {
+            text-align: center;
+            font-size: 1.5em;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            padding: 20px;
+            border: 3px solid #ddd;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .option-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-back {
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        .btn-back:hover:not(:disabled) {
+            background: #d0d0d0;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: #5568d3;
+        }
+
+        .btn-next:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Final Screen Styles */
+        #final-screen {
+            text-align: center;
+        }
+
+        .summary {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .summary h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .summary p {
+            color: #555;
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
+
+        .road {
+            background: #555;
+            height: 200px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .road-lines {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(
+                to right,
+                transparent,
+                transparent 20px,
+                white 20px,
+                white 40px
+            );
+            transform: translateY(-50%);
+        }
+
+        .car {
+            position: absolute;
+            bottom: 40px;
+            width: 120px;
+            height: 60px;
+            transition: left 0.1s ease;
+        }
+
+        .car-body {
+            position: relative;
+            width: 100%;
+            height: 35px;
+            background: red;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .car-roof {
+            position: absolute;
+            top: -15px;
+            left: 25%;
+            width: 50%;
+            height: 20px;
+            background: inherit;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .car-window {
+            position: absolute;
+            top: -12px;
+            left: 28%;
+            width: 44%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .car-wheels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+        }
+
+        .wheel {
+            width: 20px;
+            height: 20px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        .wheel.square {
+            border-radius: 3px;
+        }
+
+        .wheel.star {
+            background: #333;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+
+        /* Pattern Styles */
+        .pattern-stripes {
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(0, 0, 0, 0.2) 10px,
+                rgba(0, 0, 0, 0.2) 20px
+            );
+        }
+
+        .pattern-dots {
+            background-image: radial-gradient(circle, rgba(0, 0, 0, 0.2) 2px, transparent 2px);
+            background-size: 15px 15px;
+        }
+
+        .pattern-zigzag {
+            background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.2) 25%, transparent 25%),
+                              linear-gradient(225deg, rgba(0, 0, 0, 0.2) 25%, transparent 25%),
+                              linear-gradient(45deg, rgba(0, 0, 0, 0.2) 25%, transparent 25%),
+                              linear-gradient(315deg, rgba(0, 0, 0, 0.2) 25%, transparent 25%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 0, 10px -10px, 0 -10px;
+        }
+
+        .btn-restart {
+            background: #764ba2;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.1em;
+        }
+
+        .btn-restart:hover {
+            background: #653a8b;
+        }
+
+        .instructions {
+            color: #666;
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Design Your Car</h1>
+
+        <!-- Step 1: Choose Color -->
+        <div id="step-1" class="step active">
+            <div class="question">Choose your car color</div>
+            <div class="options">
+                <div class="option" data-value="Red">
+                    <div class="option-icon">🔴</div>
+                    Red
+                </div>
+                <div class="option" data-value="Blue">
+                    <div class="option-icon">🔵</div>
+                    Blue
+                </div>
+                <div class="option" data-value="Black">
+                    <div class="option-icon">⚫</div>
+                    Black
+                </div>
+                <div class="option" data-value="White">
+                    <div class="option-icon">⚪</div>
+                    White
+                </div>
+                <div class="option" data-value="Yellow">
+                    <div class="option-icon">🟡</div>
+                    Yellow
+                </div>
+                <div class="option" data-value="Green">
+                    <div class="option-icon">🟢</div>
+                    Green
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn-back hidden" id="back-1">Back</button>
+                <button class="btn-next" id="next-1" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Choose Tire Shape -->
+        <div id="step-2" class="step">
+            <div class="question">Choose your tire shape</div>
+            <div class="options">
+                <div class="option" data-value="circle">
+                    <div class="option-icon">●</div>
+                    Circle
+                </div>
+                <div class="option" data-value="square">
+                    <div class="option-icon">■</div>
+                    Square
+                </div>
+                <div class="option" data-value="star">
+                    <div class="option-icon">★</div>
+                    Star
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn-back" id="back-2">Back</button>
+                <button class="btn-next" id="next-2" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Choose Pattern -->
+        <div id="step-3" class="step">
+            <div class="question">Choose your car pattern</div>
+            <div class="options">
+                <div class="option" data-value="stripes">
+                    <div class="option-icon">▨</div>
+                    Stripes
+                </div>
+                <div class="option" data-value="dots">
+                    <div class="option-icon">⬡</div>
+                    Dots
+                </div>
+                <div class="option" data-value="zigzag">
+                    <div class="option-icon">〰️</div>
+                    Zigzag
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn-back" id="back-3">Back</button>
+                <button class="btn-next" id="next-3" disabled>Finish</button>
+            </div>
+        </div>
+
+        <!-- Final Screen -->
+        <div id="final-screen" class="step">
+            <div class="summary">
+                <h2>Your Custom Car is Ready!</h2>
+                <p id="summary-text"></p>
+            </div>
+
+            <div class="road">
+                <div class="road-lines"></div>
+                <div class="car" id="car">
+                    <div class="car-body" id="car-body">
+                        <div class="car-roof"></div>
+                        <div class="car-window"></div>
+                    </div>
+                    <div class="car-wheels">
+                        <div class="wheel" id="wheel-1"></div>
+                        <div class="wheel" id="wheel-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="instructions">Use ← → arrow keys to drive your car!</p>
+
+            <button class="btn-restart" id="restart">Start Over</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== STATE MANAGEMENT =====
+        // This object holds all user selections and current app state
+        const state = {
+            currentStep: 1,
+            selections: {
+                color: null,
+                tireShape: null,
+                pattern: null
+            },
+            carPosition: 0 // Position of the car on the road (in pixels)
+        };
+
+        // Color mapping for CSS values
+        const colorMap = {
+            'Red': '#e74c3c',
+            'Blue': '#3498db',
+            'Black': '#2c3e50',
+            'White': '#ecf0f1',
+            'Yellow': '#f1c40f',
+            'Green': '#2ecc71'
+        };
+
+        // ===== STEP NAVIGATION =====
+        // Function to show a specific step and hide all others
+        function showStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+
+            // Show the requested step
+            const stepToShow = stepNumber === 'final'
+                ? document.getElementById('final-screen')
+                : document.getElementById(`step-${stepNumber}`);
+            stepToShow.classList.add('active');
+
+            state.currentStep = stepNumber;
+        }
+
+        // ===== OPTION SELECTION HANDLING =====
+        // This function handles when a user clicks on an option in any step
+        function handleOptionClick(event) {
+            const option = event.currentTarget;
+            const step = option.closest('.step');
+            const stepId = step.id;
+
+            // Remove 'selected' class from all options in this step
+            step.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Add 'selected' class to clicked option
+            option.classList.add('selected');
+
+            // Store the selection in state based on which step we're on
+            const value = option.dataset.value;
+            if (stepId === 'step-1') {
+                state.selections.color = value;
+            } else if (stepId === 'step-2') {
+                state.selections.tireShape = value;
+            } else if (stepId === 'step-3') {
+                state.selections.pattern = value;
+            }
+
+            // Enable the Next button for this step
+            const nextButton = step.querySelector('.btn-next');
+            nextButton.disabled = false;
+        }
+
+        // ===== NAVIGATION BUTTON HANDLERS =====
+        // Handle Next button clicks - advance to next step
+        function handleNext(currentStepNum) {
+            if (currentStepNum < 3) {
+                showStep(currentStepNum + 1);
+            } else {
+                // Last step - show final screen with the car
+                showFinalScreen();
+            }
+        }
+
+        // Handle Back button clicks - return to previous step
+        function handleBack(currentStepNum) {
+            if (currentStepNum > 1) {
+                showStep(currentStepNum - 1);
+            }
+        }
+
+        // ===== FINAL SCREEN =====
+        // Display the final screen with the customized car
+        function showFinalScreen() {
+            // Update summary text
+            const summaryText = `Color: ${state.selections.color} | Tires: ${state.selections.tireShape} | Pattern: ${state.selections.pattern}`;
+            document.getElementById('summary-text').textContent = summaryText;
+
+            // Apply car color
+            const carBody = document.getElementById('car-body');
+            carBody.style.background = colorMap[state.selections.color];
+
+            // Apply tire shape
+            const wheels = [document.getElementById('wheel-1'), document.getElementById('wheel-2')];
+            wheels.forEach(wheel => {
+                wheel.className = 'wheel'; // Reset classes
+                if (state.selections.tireShape !== 'circle') {
+                    wheel.classList.add(state.selections.tireShape);
+                }
+            });
+
+            // Apply pattern
+            carBody.className = 'car-body'; // Reset classes
+            if (state.selections.pattern) {
+                carBody.classList.add(`pattern-${state.selections.pattern}`);
+            }
+
+            // Reset car position to start
+            state.carPosition = 0;
+            updateCarPosition();
+
+            // Show final screen
+            showStep('final');
+        }
+
+        // ===== KEYBOARD CONTROLS FOR DRIVING =====
+        // Update the car's position on the road
+        function updateCarPosition() {
+            const car = document.getElementById('car');
+            car.style.left = state.carPosition + 'px';
+        }
+
+        // Handle keyboard input for driving the car
+        function handleKeyPress(event) {
+            // Only allow driving when on the final screen
+            if (state.currentStep !== 'final') return;
+
+            const road = document.querySelector('.road');
+            const car = document.getElementById('car');
+            const roadWidth = road.offsetWidth;
+            const carWidth = car.offsetWidth;
+            const maxPosition = roadWidth - carWidth;
+
+            // Left arrow key - move car left
+            if (event.key === 'ArrowLeft') {
+                state.carPosition = Math.max(0, state.carPosition - 15);
+                updateCarPosition();
+            }
+            // Right arrow key - move car right
+            else if (event.key === 'ArrowRight') {
+                state.carPosition = Math.min(maxPosition, state.carPosition + 15);
+                updateCarPosition();
+            }
+        }
+
+        // ===== RESET FUNCTIONALITY =====
+        // Reset all state and return to step 1
+        function resetApp() {
+            // Clear all selections
+            state.selections = {
+                color: null,
+                tireShape: null,
+                pattern: null
+            };
+            state.carPosition = 0;
+
+            // Remove all 'selected' classes from options
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Disable all Next buttons
+            document.querySelectorAll('.btn-next').forEach(btn => {
+                btn.disabled = true;
+            });
+
+            // Return to step 1
+            showStep(1);
+        }
+
+        // ===== EVENT LISTENERS SETUP =====
+        // Initialize all event listeners when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to all option buttons
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', handleOptionClick);
+            });
+
+            // Add handlers for Next buttons
+            document.getElementById('next-1').addEventListener('click', () => handleNext(1));
+            document.getElementById('next-2').addEventListener('click', () => handleNext(2));
+            document.getElementById('next-3').addEventListener('click', () => handleNext(3));
+
+            // Add handlers for Back buttons
+            document.getElementById('back-2').addEventListener('click', () => handleBack(2));
+            document.getElementById('back-3').addEventListener('click', () => handleBack(3));
+
+            // Add handler for Start Over button
+            document.getElementById('restart').addEventListener('click', resetApp);
+
+            // Add keyboard listener for arrow keys (driving the car)
+            document.addEventListener('keydown', handleKeyPress);
+        });
+    </script>
+</body>
+</html>
