@@ -283,6 +283,7 @@
             height: 20px;
             background: #333;
             border-radius: 50%;
+            transition: transform 0.1s linear;
         }
 
         .wheel.square {
@@ -468,7 +469,8 @@
                 tireShape: null,
                 pattern: null
             },
-            carPosition: 0 // Position of the car on the road (in pixels)
+            carPosition: 0, // Position of the car on the road (in pixels)
+            wheelRotation: 0 // Rotation angle of the wheels (in degrees)
         };
 
         // Color mapping for CSS values
@@ -612,8 +614,9 @@
                 }
             });
 
-            // Reset car position to start
+            // Reset car position and wheel rotation to start
             state.carPosition = 0;
+            state.wheelRotation = 0;
             updateCarPosition();
 
             // Show final screen
@@ -621,10 +624,16 @@
         }
 
         // ===== KEYBOARD CONTROLS FOR DRIVING =====
-        // Update the car's position on the road
+        // Update the car's position and wheel rotation on the road
         function updateCarPosition() {
             const car = document.getElementById('car');
             car.style.left = state.carPosition + 'px';
+
+            // Update wheel rotation
+            const wheels = document.querySelectorAll('.wheel');
+            wheels.forEach(wheel => {
+                wheel.style.transform = `rotate(${state.wheelRotation}deg)`;
+            });
         }
 
         // Handle keyboard input for driving the car
@@ -641,11 +650,13 @@
             // Left arrow key - move car left
             if (event.key === 'ArrowLeft') {
                 state.carPosition = Math.max(0, state.carPosition - 15);
+                state.wheelRotation -= 30; // Rotate wheels backwards
                 updateCarPosition();
             }
             // Right arrow key - move car right
             else if (event.key === 'ArrowRight') {
                 state.carPosition = Math.min(maxPosition, state.carPosition + 15);
+                state.wheelRotation += 30; // Rotate wheels forwards
                 updateCarPosition();
             }
         }
@@ -660,6 +671,7 @@
                 pattern: null
             };
             state.carPosition = 0;
+            state.wheelRotation = 0;
 
             // Remove all 'selected' classes from options
             document.querySelectorAll('.option').forEach(opt => {
