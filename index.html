@@ -436,10 +436,6 @@
         <div id="step-3" class="step">
             <div class="question">Choose your car pattern</div>
             <div class="options">
-                <div class="option" data-value="none">
-                    <div class="option-icon">⬜</div>
-                    None
-                </div>
                 <div class="option" data-value="stripes">
                     <div class="option-icon">▨</div>
                     Stripes
@@ -616,7 +612,7 @@
         // Display the final screen with the customized car
         function showFinalScreen() {
             // Update summary text
-            const patternText = state.selections.pattern === 'none' ? 'None' : state.selections.pattern.charAt(0).toUpperCase() + state.selections.pattern.slice(1);
+            const patternText = state.selections.pattern.charAt(0).toUpperCase() + state.selections.pattern.slice(1);
             const summaryText = `Color: ${state.selections.color} | Tires: ${state.selections.tireShape} | Pattern: ${patternText}`;
             document.getElementById('summary-text').textContent = summaryText;
 
@@ -626,8 +622,8 @@
             // Reset classes first
             carBody.className = 'car-body';
 
-            // Apply pattern class if selected (but not if "none" is chosen)
-            if (state.selections.pattern && state.selections.pattern !== 'none') {
+            // Apply pattern class if selected
+            if (state.selections.pattern) {
                 carBody.classList.add(`pattern-${state.selections.pattern}`);
             }
 
